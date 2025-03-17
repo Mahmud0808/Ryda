@@ -1,8 +1,14 @@
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { Redirect, Stack } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
 import "react-native-reanimated";
 
 const Layout = () => {
+  const { isSignedIn } = useAuth();
+
+  if (isSignedIn) {
+    return <Redirect href={"/(root)/(tabs)/home"} />;
+  }
+
   return (
     <>
       <Stack>

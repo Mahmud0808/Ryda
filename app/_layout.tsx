@@ -3,11 +3,15 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as NavigationBar from "expo-navigation-bar";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import "../global.css";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
+import { tokenCache } from "@/lib/cache";
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -21,29 +25,38 @@ export default function RootLayout() {
     "Jakarta-SemiBold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
   });
 
+  if (!publishableKey) {
+    throw new Error(
+      "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env"
+    );
+  }
+
+  const [statusBarColor, setStatusBarColor] = useState("#2f80ed");
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      setStatusBarColor("#00000000");
     }
-    // enables edge-to-edge mode
-    NavigationBar.setPositionAsync("absolute");
-    // transparent backgrounds to see through
-    NavigationBar.setBackgroundColorAsync("#ffffff00");
+    NavigationBar.setPositionAsync("absolute"); // edge-to-edge mode
+    NavigationBar.setBackgroundColorAsync("#00000000");
   }, [loaded]);
 
   if (!loaded) {
-    return null;
+    return <StatusBar backgroundColor={statusBarColor} style="dark" />;
   }
 
   return (
-    <>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(root)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="dark" />
-    </>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+      <ClerkLoaded>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(root)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar backgroundColor={statusBarColor} style="dark" />
+      </ClerkLoaded>
+    </ClerkProvider>
   );
 }
