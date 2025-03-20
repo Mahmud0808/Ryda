@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { Alert, Image, Modal, ScrollView, Text, View } from "react-native";
 import { ReactNativeModal } from "react-native-modal";
 import { useSignUp } from "@clerk/clerk-expo";
-import * as NavigationBar from "expo-navigation-bar";
+import { fetchAPI } from "@/lib/fetch";
 
 const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -39,6 +39,11 @@ const SignUp = () => {
         state: "pending",
       });
     } catch (err: any) {
+      setverification({
+        ...verification,
+        state: "failed",
+        error: err.errors[0].longMessage,
+      });
       Alert.alert("Error", err.errors[0].longMessage);
     }
   };
@@ -52,12 +57,19 @@ const SignUp = () => {
       });
 
       if (signUpAttempt.status === "complete") {
-        // TODO: Save user data in database
+        await fetchAPI("/(api)/user", {
+          method: "POST",
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            clerkId: signUpAttempt.createdUserId,
+          }),
+        });
 
         await setActive({ session: signUpAttempt.createdSessionId });
         setverification({
           ...verification,
-          state: "complete",
+          state: "success",
         });
       } else {
         setverification({
@@ -148,7 +160,7 @@ const SignUp = () => {
             <InputField
               label="Verification Code"
               icon={icons.lock}
-              placeholder="12345"
+              placeholder="123456"
               value={verification.code}
               keyboardType="numeric"
               onChangeText={(value) =>
