@@ -3,11 +3,9 @@ import "react-native-reanimated";
 
 const Layout = () => {
   return (
-    <>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </>
+    <Stack screenOptions={{ contentStyle: { backgroundColor: "#F6F8FA" } }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 };
 

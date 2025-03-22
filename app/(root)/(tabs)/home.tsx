@@ -1,25 +1,21 @@
-import React from "react";
-import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
-import { Link } from "expo-router";
-import { Text } from "react-native";
+import React, { useEffect } from "react";
+import { FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { mockRides } from "@/constants/mocks";
+import RideCard from "@/components/RideCard";
+
+const recentRides = mockRides;
 
 const Home = () => {
-  const { user } = useUser();
-
   return (
-    <SafeAreaView>
-      <SignedIn>
-        <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
-      </SignedIn>
-      <SignedOut>
-        <Link href="/(auth)/sign-in">
-          <Text>Sign in</Text>
-        </Link>
-        <Link href="/(auth)/sign-up">
-          <Text>Sign up</Text>
-        </Link>
-      </SignedOut>
+    <SafeAreaView className="bg-general-500">
+      <FlatList
+        data={recentRides?.slice(0, 5)}
+        renderItem={({ item }) => <RideCard ride={item} />}
+        className="px-5"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 100 }}
+      />
     </SafeAreaView>
   );
 };
