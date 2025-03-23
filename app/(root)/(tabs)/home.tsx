@@ -1,20 +1,90 @@
-import React, { useEffect } from "react";
-import { FlatList } from "react-native";
+import React from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { mockRides } from "@/constants/mocks";
 import RideCard from "@/components/RideCard";
+import { useAuth, useUser } from "@clerk/clerk-expo";
+import { icons, images } from "@/constants";
+import GoogleTextInput from "@/components/GoogleTextInput";
+import Map from "@/components/Map";
+import "react-native-get-random-values";
+import { router } from "expo-router";
 
 const recentRides = mockRides;
 
 const Home = () => {
+  const { user } = useUser();
+  const { signOut } = useAuth();
+  const loading = true;
+
+  const handleSignOut = () => {
+    signOut();
+    router.replace("/(auth)/sign-in");
+  };
+
+  const handleDestinationPress = () => {};
+
   return (
-    <SafeAreaView className="bg-general-500">
+    <SafeAreaView className="bg-general-500 flex-1">
       <FlatList
         data={recentRides?.slice(0, 5)}
         renderItem={({ item }) => <RideCard ride={item} />}
         className="px-5"
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: 100 }}
+        ListEmptyComponent={() => (
+          <View className="flex flex-col items-center justify-center">
+            {!loading ? (
+              <>
+                <Image
+                  source={images.noResult}
+                  resizeMode="contain"
+                  className="w-40 h-40"
+                  alt=""
+                />
+                <Text className="text-sm">No recent rides found</Text>
+              </>
+            ) : (
+              <ActivityIndicator size="small" color="#000" />
+            )}
+          </View>
+        )}
+        ListHeaderComponent={() => (
+          <>
+            <View className="flex flex-row items-center justify-between my-5">
+              <Text className="text-2xl capitalize font-JakartaExtraBold">
+                Welcome {user?.firstName || "user"} 👋
+              </Text>
+              <TouchableOpacity
+                onPress={handleSignOut}
+                className="justify-center items-center w-10 h-10 rounded-full bg-transparent"
+              >
+                <Image source={icons.out} className="w-6 h-6" />
+              </TouchableOpacity>
+            </View>
+            <GoogleTextInput
+              icon={icons.search}
+              containerStyle="bg-white shadow-md shadow-neutral-300"
+              handlePress={handleDestinationPress}
+            />
+            <Text className="text-xl font-JakartaBold mt-5 mb-3">
+              Your current location
+            </Text>
+            <View className="flex flex-row items-center bg-transparent h-[300px]">
+              <Map />
+            </View>
+            <Text className="text-xl font-JakartaBold mt-5 mb-3">
+              Recent rides
+            </Text>
+          </>
+        )}
       />
     </SafeAreaView>
   );
