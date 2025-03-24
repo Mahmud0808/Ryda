@@ -34,7 +34,15 @@ const Home = () => {
     router.replace("/(auth)/sign-in");
   };
 
-  const handleDestinationPress = () => {};
+  const handleDestinationPress = (location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  }) => {
+    setDestinationLocation(location);
+
+    router.push("/(root)/find-ride");
+  };
 
   useEffect(() => {
     const requestLocation = async () => {
@@ -68,7 +76,7 @@ const Home = () => {
         data={recentRides?.slice(0, 5)}
         renderItem={({ item }) => <RideCard ride={item} />}
         className="px-5"
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         contentContainerStyle={{ paddingBottom: 100 }}
         ListEmptyComponent={() => (
           <View className="flex flex-col items-center justify-center">
