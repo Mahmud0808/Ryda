@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -16,13 +16,18 @@ import GoogleTextInput from "@/components/GoogleTextInput";
 import Map from "@/components/Map";
 import "react-native-get-random-values";
 import { router } from "expo-router";
+import { useLocationStore } from "@/store";
+import * as Location from "expo-location";
 
 const recentRides = mockRides;
 
 const Home = () => {
+  const { setUserLocation, setDestinationLocation } = useLocationStore();
   const { user } = useUser();
   const { signOut } = useAuth();
   const loading = true;
+
+  const [hasPermission, setHasPermission] = useState(false);
 
   const handleSignOut = () => {
     signOut();
@@ -30,6 +35,32 @@ const Home = () => {
   };
 
   const handleDestinationPress = () => {};
+
+  useEffect(() => {
+    const requestLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        setHasPermission(false);
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync();
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        address: `${address[0].name} ${address[0].region}`,
+      });
+    };
+
+    requestLocation();
+  }, [user]);
 
   return (
     <SafeAreaView className="bg-general-500 flex-1">
@@ -77,7 +108,7 @@ const Home = () => {
             <Text className="text-xl font-JakartaBold mt-5 mb-3">
               Your current location
             </Text>
-            <View className="flex flex-row items-center bg-transparent h-[300px]">
+            <View className="flex flex-row items-center bg-transparent h-[300px] rounded-lg overflow-hidden">
               <Map />
             </View>
             <Text className="text-xl font-JakartaBold mt-5 mb-3">

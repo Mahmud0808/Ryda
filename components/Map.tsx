@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
-
 import { icons } from "@/constants";
 import { useFetch } from "@/lib/fetch";
 import { Driver, MarkerData } from "@/types/type";
@@ -13,9 +18,13 @@ import {
   generateMarkersFromData,
 } from "@/lib/map";
 
-const directionsAPI = process.env.EXPO_PUBLIC_DIRECTIONS_API_KEY;
+const directionsAPI = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 const Map = () => {
+  if (!directionsAPI) {
+    throw new Error("Missing Google Maps API key");
+  }
+
   const {
     userLongitude,
     userLatitude,
@@ -82,10 +91,11 @@ const Map = () => {
 
   return (
     <MapView
+      style={styles.map}
       provider={PROVIDER_DEFAULT}
       className="w-full h-full rounded-2xl"
       tintColor="black"
-      mapType="mutedStandard"
+      mapType={Platform.OS === "ios" ? "mutedStandard" : "standard"}
       showsPointsOfInterest={false}
       initialRegion={region}
       showsUserLocation={true}
@@ -136,3 +146,9 @@ const Map = () => {
 };
 
 export default Map;
+
+const styles = StyleSheet.create({
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+});
