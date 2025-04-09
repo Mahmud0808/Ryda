@@ -33,9 +33,13 @@ const Home = () => {
     error,
   } = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
 
-  const handleSignOut = () => {
-    signOut();
-    router.replace("/(auth)/sign-in");
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.replace("/(auth)/sign-in");
+    } catch (error) {
+      console.error("Sign out failed:", error);
+    }
   };
 
   const handleDestinationPress = (location: {

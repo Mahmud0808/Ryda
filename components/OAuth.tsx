@@ -1,10 +1,25 @@
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Alert, Image, Text, View } from "react-native";
 import CustomButton from "./CustomButton";
 import { icons } from "@/constants";
+import { useSSO } from "@clerk/clerk-expo";
+import { router } from "expo-router";
+import { googleOAuth } from "@/lib/auth";
 
 const OAuth = () => {
-  const handleGoogleSignIn = async () => {};
+  const { startSSOFlow } = useSSO();
+
+  const handleGoogleSignIn = async () => {
+    const result = await googleOAuth(startSSOFlow);
+
+    if (result.code === "session_exists" || result.code === "success") {
+      router.replace("/(root)/(tabs)/home");
+    }
+
+    if (!result.success) {
+      Alert.alert("Error", result.message);
+    }
+  };
 
   return (
     <View>
