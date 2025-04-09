@@ -8,7 +8,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { mockRides } from "@/constants/mocks";
 import RideCard from "@/components/RideCard";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { icons, images } from "@/constants";
@@ -18,16 +17,21 @@ import "react-native-get-random-values";
 import { router } from "expo-router";
 import { useLocationStore } from "@/store";
 import * as Location from "expo-location";
-
-const recentRides = mockRides;
+import { useFetch } from "@/lib/fetch";
+import { Ride } from "@/types/type";
 
 const Home = () => {
-  const { setUserLocation, setDestinationLocation } = useLocationStore();
   const { user } = useUser();
   const { signOut } = useAuth();
-  const loading = true;
+  const { setUserLocation, setDestinationLocation } = useLocationStore();
 
   const [hasPermission, setHasPermission] = useState(false);
+
+  const {
+    data: recentRides,
+    loading,
+    error,
+  } = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
 
   const handleSignOut = () => {
     signOut();

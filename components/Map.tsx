@@ -75,19 +75,21 @@ const Map = () => {
     destinationLongitude,
   });
 
-  if (loading || (!userLatitude && !userLongitude))
+  if (loading || (!userLatitude && !userLongitude)) {
     return (
       <View className="flex justify-between items-center w-full">
         <ActivityIndicator size="small" color="#000" />
       </View>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <View className="flex justify-between items-center w-full">
         <Text>Error: {error}</Text>
       </View>
     );
+  }
 
   return (
     <MapView
